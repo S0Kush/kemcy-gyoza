@@ -10,7 +10,7 @@
     --bg: #1c1f26;
     --ink: #eef0f4;
     --muted: #9aa1b0;
-    --accent: #e0563b;
+    --accent: #7c4dff;
     --panel: rgba(22, 24, 30, .88);
     --line: rgba(255, 255, 255, .12);
   }
@@ -166,22 +166,26 @@ const CONFIG = {
 // ============================================================
 // THEME : toutes les couleurs (à remplacer par la DA du clip Gyoza)
 // ============================================================
+// DA : Bordeaux de jour. Pierre blonde, toits en zinc, ferronnerie noire,
+// vitrine à cadre bronze du local, accent violet, tag rose.
 const THEME = {
-  skyTop: '#232733', skyBottom: '#3d4352', beatFlash: 'rgba(255,255,255,0.035)',
-  far:  { body: '#2c313c', roof: '#272b35', window: 'rgba(240,220,160,0.18)' },
-  near: { body: '#343a47', roof: '#2e3340', window: 'rgba(240,220,160,0.28)' },
-  wall: '#5a6170', wallEdge: '#4a505d', roof: '#7b8394', roofEdge: '#3f4450',
-  window: '#474d5a', windowLit: '#d9c48a',
-  ground: '#3a3f4a', curb: '#8d94a3',
-  plank: '#a38f6a', pole: '#6f6450',
-  slick: '#5fb3d9', sticky: '#d96b9a', spikes: '#cfd3db',
-  coin: '#f2d38a', coinEdge: '#b98c45',
-  checkOff: '#6f7686', checkOn: '#7fd18b',
-  text: '#e6e8ee', bubble: '#f4f5f7', bubbleInk: '#1c1f26',
-  shopWall: '#4b5160', shopGlass: '#6b8496', shopSign: '#eef0f4',
-  paint: '#d96b9a',
-  kemcy:    { body: '#eceef2', bodyDark: '#c5c9d2', pants: '#2f3440', pantsDark: '#262a33', skin: '#b07a55' },
-  graffeur: { body: '#d9545f', bodyDark: '#b03f4a', pants: '#2f3440', pantsDark: '#262a33', skin: '#c99772', cap: '#22252c', accent: '#f2b84b' },
+  skyTop: '#8fa9bd', skyBottom: '#f1e2c4', beatFlash: 'rgba(255,240,210,0.06)', cloud: 'rgba(255,255,255,0.5)',
+  far:  { body: '#cdbfa6', shade: '#c2b398', roof: '#a3abb0', window: '#b3a486', spire: '#c4b496' },
+  near: { body: '#c2aa82', shade: '#b29a74', roof: '#7d8a93', window: '#5d6b74', iron: '#3a3a3e' },
+  stone: '#d8c39b', stoneLight: '#e7d6b2', stoneShade: '#bca47b', stoneJoint: 'rgba(120,95,60,0.2)',
+  zinc: '#7f8d97', zincSeam: '#6a7882', cornice: '#eee0bf', corniceShadow: 'rgba(80,60,35,0.25)',
+  glass: '#3e4b55', glassHi: 'rgba(255,255,255,0.16)', iron: '#2c2c31',
+  pave: '#dcbf95', paveJoint: 'rgba(120,90,55,0.28)', curb: '#ebdcbd', underground: '#5b544c', cobble: '#8f8576',
+  plank: '#a7814f', pole: '#8d969c',
+  slick: '#3fa7e0', sticky: '#e0559a', spikes: '#eef7fa',
+  coin: '#f3cf7a', coinEdge: '#a8792f',
+  checkOff: '#8f8a80', checkOn: '#7c4dff',
+  text: '#3b3127', textHalo: 'rgba(255,248,235,0.75)', bubble: '#ffffff', bubbleInk: '#1f1b17',
+  shopFrame: '#7a4b2b', shopGlass: '#5a6a6c', shopGlassHi: 'rgba(205,230,215,0.22)', shopText: '#ffffff',
+  chrome: ['#f6f7f9', '#a3a9b0', '#4b5057'], mailbox: '#6b3f26',
+  paint: '#e0559a',
+  kemcy:    { body: '#c4ad86', bodyDark: '#a38c66', pants: '#2b2e35', pantsDark: '#202228', skin: '#e0b391', boots: '#5a5d64', glasses: '#1e1f24' },
+  graffeur: { body: '#2a2a31', bodyDark: '#1d1d22', pants: '#454b57', pantsDark: '#363b45', skin: '#c99772', cap: '#7c4dff', accent: '#7c4dff' },
 };
 
 // ============================================================
@@ -226,8 +230,8 @@ const wp       = (x, y, arc) => WP.push({ x: (x + 0.5) * T, y: y * T, arc: !!arc
 
 // 1. La rue, devant le local
 street(0, 22); block(14, 15, 17, 18); street(27, 33); building(34, 44, 16);
-sign(1, 10, '← →  pour courir', '◀ ▶  pour courir');
-sign(1, 11, 'ESPACE  pour sauter', 'SAUT  pour sauter');
+sign(9, 13, '← →  pour courir', '◀ ▶  pour courir');
+sign(9, 14, 'ESPACE  pour sauter', 'SAUT  pour sauter');
 sign(18, 13, 'Garde le saut appuyé pour monter plus haut');
 coin(7, 18); coin(9, 18); coin(11, 18); coin(24, 16); coin(25, 15); coin(26, 16); coin(30, 18); coin(40, 15);
 
@@ -262,7 +266,7 @@ coin(156, 7); coin(165, 9); coin(166, 9); coin(172, 8); coin(181, 2); coin(184, 
 [[3, 19], [38, 16], [74, 9], [88, 19], [116, 7], [141, 6], [154, 9], [177, 4]].forEach(([x, y]) => checkpoint(x, y));
 
 // Trajet du grapheur (arc = il saute pour rejoindre ce point)
-[[9, 19], [20, 19], [28, 19, 1], [37, 16, 1], [44, 16], [49, 14, 1], [55, 12, 1], [61, 10, 1], [67, 8, 1],
+[[7, 19], [20, 19], [28, 19, 1], [37, 16, 1], [44, 16], [49, 14, 1], [55, 12, 1], [61, 10, 1], [67, 8, 1],
  [76, 9, 1], [83, 9], [88, 19, 1], [95, 19], [96, 5, 1], [110, 5], [116, 7, 1], [124, 7], [128, 4, 1],
  [132, 4, 1], [140, 6, 1], [142, 6], [146, 6, 1], [150, 6], [155, 9, 1], [163, 12, 1], [168, 12, 1],
  [172, 10, 1], [174, 7, 1], [178, 4, 1], [188, 4]].forEach(([x, y, a]) => wp(x, y, a));
@@ -580,7 +584,7 @@ function updateGraffeur(dt) {
   G.phase += dt * (G.moving && !G.ctrl ? 13 : 4);
 
   if (G.state === 'tag') {
-    if (gt > 1.1 || G.x - pcx < 5 * T) { G.state = 'flee'; say('Trop lent !'); }
+    if (gt > 1.1 || G.x - pcx < 3 * T) { G.state = 'flee'; say('Trop lent !'); }
     else if (Math.random() < 0.6) spray(G.x - 14, G.y - 20);
     return;
   }
@@ -760,48 +764,100 @@ function frame(now) {
 // ============================================================
 // Rendu
 // ============================================================
-function makeLayer(seed, f, minH, maxH, colors) {
+// Immeubles bordelais en arrière-plan : pierre, fenêtres alignées, combles mansardés
+function makeLayer(seed, f, minH, maxH, colors, grid, spireAt) {
   let s = seed;
   const R = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
   const items = [];
-  let x = 0;
+  let x = 0, spire = spireAt === undefined;
   while (x < 2600) {
-    const w = 70 + R() * 130, h = minH + R() * (maxH - minH), wins = [];
-    for (let i = 0; i < 10; i++) if (R() < 0.45) wins.push([8 + R() * (w - 22), 24 + R() * (h - 40)]);
-    items.push({ x, w, h, mansard: R() < 0.65, wins });
-    x += w + 6 + R() * 26;
+    if (!spire && x > spireAt) { items.push({ x, w: 56, h: 250, spire: true }); x += 70; spire = true; continue; }
+    const w = 90 + R() * 130, h = minH + R() * (maxH - minH);
+    const chimneys = [];
+    for (let i = 0; i < 3; i++) if (R() < 0.55) chimneys.push(14 + R() * (w - 34));
+    items.push({ x, w, h, mansard: R() < 0.75, chimneys });
+    x += w + R() * 10;
   }
-  return { f, items, span: x, colors };
+  return { f, items, span: x, colors, grid };
 }
 const layers = [
-  makeLayer(7, 0.18, 180, 420, THEME.far),
-  makeLayer(31, 0.45, 110, 300, THEME.near),
+  makeLayer(7, 0.18, 170, 330, THEME.far, { col: 16, row: 30, w: 6, h: 13 }, 1100),
+  makeLayer(31, 0.45, 120, 280, THEME.near, { col: 22, row: 38, w: 9, h: 20 }),
 ];
 
-function drawLayers(beat) {
+// Flèche gothique (clin d'œil à la flèche Saint-Michel)
+function drawSpire(sx, base, b, color) {
+  const top = base - b.h;
+  ctx.fillStyle = color;
+  ctx.fillRect(sx + 12, top, 32, b.h + 800);
+  ctx.beginPath();
+  ctx.moveTo(sx + 8, top); ctx.lineTo(sx + 28, top - 190); ctx.lineTo(sx + 48, top);
+  ctx.moveTo(sx + 6, top + 4); ctx.lineTo(sx + 11, top - 36); ctx.lineTo(sx + 16, top + 4);
+  ctx.moveTo(sx + 40, top + 4); ctx.lineTo(sx + 45, top - 36); ctx.lineTo(sx + 50, top + 4);
+  ctx.fill();
+  ctx.fillStyle = THEME.far.window;
+  for (let y = top + 30; y < base; y += 46) ctx.fillRect(sx + 24, y, 8, 22);
+}
+
+const clouds = (() => {
+  let s = 99;
+  const R = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  return Array.from({ length: 9 }, () => ({ x: R() * 3000, y: 30 + R() * 150, w: 110 + R() * 170 }));
+})();
+
+function drawClouds() {
+  ctx.fillStyle = THEME.cloud;
+  const ox = camX * 0.05;
+  for (const c of clouds) {
+    const sx = ((c.x - ox) % 3000 + 3000) % 3000 - 300;
+    if (sx > viewW || sx + c.w < 0) continue;
+    ctx.beginPath();
+    ctx.ellipse(sx + c.w * 0.5, c.y, c.w * 0.5, c.w * 0.12, 0, 0, Math.PI * 2);
+    ctx.ellipse(sx + c.w * 0.35, c.y - c.w * 0.07, c.w * 0.22, c.w * 0.12, 0, 0, Math.PI * 2);
+    ctx.ellipse(sx + c.w * 0.62, c.y - c.w * 0.06, c.w * 0.18, c.w * 0.1, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawLayers() {
   const bottomOffset = H * T - viewH;
   for (const L of layers) {
     const ox = camX * L.f;
     const base = viewH + 80 - (camY - bottomOffset) * L.f;
     const start = -(ox % L.span);
+    const g = L.grid;
     for (let k = 0; start + k * L.span < viewW; k++) {
       for (const b of L.items) {
         const sx = start + k * L.span + b.x;
         if (sx > viewW || sx + b.w < 0) continue;
+        if (b.spire) { drawSpire(sx, base, b, L.colors.spire); continue; }
         const top = base - b.h;
-        ctx.fillStyle = L.colors.body;
-        ctx.fillRect(sx, top, b.w, b.h + 800);
+        ctx.fillStyle = L.colors.body; ctx.fillRect(sx, top, b.w, b.h + 800);
+        ctx.fillStyle = L.colors.shade; ctx.fillRect(sx + b.w - 5, top, 5, b.h + 800);
         if (b.mansard) {
+          ctx.fillStyle = L.colors.body;
+          for (const cx of b.chimneys) ctx.fillRect(sx + cx, top - 34, 9, 34);
           ctx.fillStyle = L.colors.roof;
           ctx.beginPath();
-          ctx.moveTo(sx - 4, top); ctx.lineTo(sx + 10, top - 18);
-          ctx.lineTo(sx + b.w - 10, top - 18); ctx.lineTo(sx + b.w + 4, top);
+          ctx.moveTo(sx - 3, top); ctx.lineTo(sx + 12, top - 24);
+          ctx.lineTo(sx + b.w - 12, top - 24); ctx.lineTo(sx + b.w + 3, top);
           ctx.fill();
         }
-        ctx.fillStyle = L.colors.window;
-        ctx.globalAlpha = 0.75 + beat * 0.25;
-        for (const [wx, wy] of b.wins) ctx.fillRect(sx + wx, top + wy, 6, 9);
-        ctx.globalAlpha = 1;
+        const cols = Math.max(1, Math.floor((b.w - 14) / g.col));
+        const gx = (b.w - (cols - 1) * g.col - g.w) / 2;
+        let row = 0;
+        for (let wy = top + 16; wy < base - 8; wy += g.row, row++) {
+          ctx.fillStyle = L.colors.window;
+          for (let i = 0; i < cols; i++) ctx.fillRect(sx + gx + i * g.col, wy, g.w, g.h);
+          if (L.colors.iron && row % 2 === 1) {
+            ctx.fillStyle = L.colors.iron;
+            ctx.fillRect(sx + gx - 3, wy + g.h - 6, (cols - 1) * g.col + g.w + 6, 2);
+          }
+        }
+        if (b.mansard) {
+          ctx.fillStyle = L.colors.window;
+          for (let i = 0; i < cols; i += 2) ctx.fillRect(sx + gx + i * g.col, top - 17, g.w, g.h * 0.6);
+        }
       }
     }
   }
@@ -819,20 +875,66 @@ function rr(x, y, w, h, r) {
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill();
 }
 
+// Robot chromé collé sur la vitrine, tenant une clé
+function drawChromeBot(cx, cy) {
+  const g = ctx.createLinearGradient(cx - 40, cy - 60, cx + 40, cy + 60);
+  g.addColorStop(0, THEME.chrome[0]); g.addColorStop(0.5, THEME.chrome[1]); g.addColorStop(1, THEME.chrome[2]);
+  ctx.fillStyle = g; ctx.strokeStyle = THEME.chrome[2]; ctx.lineWidth = 1.5;
+  rr(cx - 5, cy - 78, 10, 26, 3);
+  ctx.beginPath(); ctx.arc(cx, cy - 84, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = THEME.shopGlass; ctx.beginPath(); ctx.arc(cx, cy - 84, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = g;
+  rr(cx - 16, cy - 52, 32, 26, 9);
+  rr(cx - 22, cy - 26, 44, 44, 12);
+  ctx.beginPath(); ctx.arc(cx - 30, cy - 18, 12, 0, Math.PI * 2); ctx.arc(cx + 30, cy - 18, 12, 0, Math.PI * 2); ctx.fill();
+  rr(cx - 40, cy - 10, 12, 34, 6); rr(cx + 28, cy - 34, 12, 30, 6);
+  rr(cx - 18, cy + 18, 14, 34, 5); rr(cx + 4, cy + 18, 14, 34, 5);
+  ctx.strokeStyle = THEME.chrome[2];
+  ctx.beginPath(); ctx.arc(cx, cy - 4, 9, 0, Math.PI * 2); ctx.stroke();
+}
+
 function drawShop() {
-  // Le local de Kemcy, avec le tag sur la vitrine
-  const x = 0, y = 12 * T, w = 7 * T, h = 7 * T;
-  ctx.fillStyle = THEME.shopWall; ctx.fillRect(x, y, w, h);
-  ctx.fillStyle = THEME.roof; ctx.fillRect(x, y - 6, w + 4, 6);
-  ctx.fillStyle = THEME.shopGlass; ctx.fillRect(x + 24, y + 70, w - 48, h - 70);
-  ctx.fillStyle = THEME.shopSign; ctx.font = '900 22px system-ui, sans-serif';
-  ctx.textAlign = 'center'; ctx.fillText('KEMCY', x + w / 2, y + 44); ctx.textAlign = 'left';
+  // Le local : façade en pierre, vitrine à cadre bronze, robot chromé, et le tag
+  const x = 0, top = 9 * T, bottom = 19 * T, w = 8 * T;
+  ctx.fillStyle = THEME.stone; ctx.fillRect(x, top, w, bottom - top);
+  ctx.fillStyle = THEME.stoneJoint;
+  for (let y = top + 16, i = 0; y < bottom; y += 16, i++) {
+    ctx.fillRect(x, y, w, 1);
+    for (let jx = (i % 2) * 24; jx < w; jx += 48) ctx.fillRect(x + jx, y - 16, 1, 16);
+  }
+  ctx.fillStyle = THEME.zinc;
+  ctx.beginPath(); ctx.moveTo(x - 4, top); ctx.lineTo(x + 14, top - 30); ctx.lineTo(x + w - 14, top - 30); ctx.lineTo(x + w + 4, top); ctx.fill();
+  ctx.fillStyle = THEME.cornice; ctx.fillRect(x - 4, top, w + 8, 5);
+  ctx.fillStyle = THEME.corniceShadow; ctx.fillRect(x - 4, top + 5, w + 8, 2);
+  // Étage : deux hautes fenêtres à balcon
+  for (const wx of [44, 172]) {
+    ctx.fillStyle = THEME.stoneLight; ctx.fillRect(x + wx - 3, top + 22, 46, 66);
+    ctx.fillStyle = THEME.glass; ctx.fillRect(x + wx, top + 25, 40, 62);
+    ctx.fillStyle = THEME.glassHi; ctx.fillRect(x + wx + 4, top + 28, 6, 56);
+    ctx.fillStyle = THEME.iron; ctx.fillRect(x + wx - 6, top + 70, 52, 2); ctx.fillRect(x + wx - 6, top + 86, 52, 2);
+    for (let i = 0; i < 13; i++) ctx.fillRect(x + wx - 5 + i * 4, top + 72, 1, 14);
+  }
+  // Vitrine et porte vitrée, cadre bronze
+  const fy = top + 112;
+  ctx.fillStyle = THEME.shopFrame; ctx.fillRect(x + 16, fy, w - 32, bottom - fy);
+  ctx.fillStyle = THEME.shopGlass;
+  ctx.fillRect(x + 22, fy + 6, 140, bottom - fy - 10);
+  ctx.fillRect(x + 168, fy + 6, 66, bottom - fy - 10);
+  ctx.fillStyle = THEME.shopGlassHi;
+  ctx.beginPath(); ctx.moveTo(x + 40, fy + 6); ctx.lineTo(x + 90, fy + 6); ctx.lineTo(x + 40, fy + 80); ctx.fill();
+  drawChromeBot(x + 92, fy + 100);
+  ctx.fillStyle = THEME.shopText; ctx.textAlign = 'center';
+  ctx.font = '800 9px system-ui, sans-serif'; ctx.fillText('MAISON DE BOIS', x + 201, fy + 46);
+  ctx.font = '600 6px system-ui, sans-serif'; ctx.fillText('STUDIO', x + 201, fy + 58);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = THEME.mailbox; rr(x + 2, fy + 60, 12, 18, 2);
+  // Le tag du grapheur
   ctx.strokeStyle = THEME.paint; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.beginPath();
-  const gx = x + 40, gy = y + 110;
+  const gx = x + 34, gy = fy + 120;
   ctx.moveTo(gx, gy + 30); ctx.lineTo(gx + 14, gy); ctx.lineTo(gx + 26, gy + 34); ctx.lineTo(gx + 40, gy + 4);
   ctx.quadraticCurveTo(gx + 70, gy - 10, gx + 60, gy + 24); ctx.quadraticCurveTo(gx + 50, gy + 50, gx + 90, gy + 30);
-  ctx.moveTo(gx + 100, gy + 8); ctx.lineTo(gx + 120, gy + 40); ctx.lineTo(gx + 132, gy + 2);
+  ctx.moveTo(gx + 96, gy + 8); ctx.lineTo(gx + 112, gy + 40); ctx.lineTo(gx + 122, gy + 2);
   ctx.stroke();
 }
 
@@ -845,18 +947,49 @@ function drawTiles() {
       if (ch === '.') continue;
       const x = c * T, y = r * T;
       if (ch === 'g') {
-        ctx.fillStyle = THEME.ground; ctx.fillRect(x, y, T, T);
-        if (!solidAt(c, r - 1)) { ctx.fillStyle = THEME.curb; ctx.fillRect(x, y, T, 5); }
-      } else if (ch === '#' || ch === 's' || ch === 'k') {
-        ctx.fillStyle = THEME.wall; ctx.fillRect(x, y, T, T);
-        if (!solidAt(c - 1, r)) { ctx.fillStyle = THEME.wallEdge; ctx.fillRect(x, y, 3, T); }
-        if (!solidAt(c + 1, r)) { ctx.fillStyle = THEME.wallEdge; ctx.fillRect(x + T - 3, y, 3, T); }
+        // Trottoir en dalles beiges, bordure en pierre
+        ctx.fillStyle = THEME.underground; ctx.fillRect(x, y, T, T);
+        if (solidAt(c, r - 1) && !solidAt(c, r - 2)) {
+          // Chaussée en pavés, sous le trottoir
+          ctx.fillStyle = THEME.cobble;
+          for (let py = 0; py < 3; py++)
+            for (let px = -1; px < 3; px++)
+              rr(x + px * 12 + (py % 2) * 6 + 1, y + py * 10 + 1, 10, 8, 2.5);
+        }
         if (!solidAt(c, r - 1)) {
-          ctx.fillStyle = THEME.roof; ctx.fillRect(x - 1, y, T + 2, 7);
-          ctx.fillStyle = THEME.roofEdge; ctx.fillRect(x - 2, y + 7, T + 4, 2);
+          ctx.fillStyle = THEME.pave; ctx.fillRect(x, y, T, 14);
+          ctx.fillStyle = THEME.paveJoint;
+          ctx.fillRect(x, y + 7, T, 1); ctx.fillRect(x, y + 14, T, 1);
+          ctx.fillRect(x + (c % 2 ? 0 : 16), y, 1, 7); ctx.fillRect(x + (c % 2 ? 16 : 0), y + 7, 1, 7);
+          ctx.fillStyle = THEME.curb; ctx.fillRect(x, y, T, 3);
+        }
+      } else if (ch === '#' || ch === 's' || ch === 'k') {
+        // Façade en pierre blonde, appareillage décalé
+        ctx.fillStyle = THEME.stone; ctx.fillRect(x, y, T, T);
+        ctx.fillStyle = THEME.stoneJoint;
+        ctx.fillRect(x, y + 15, T, 1); ctx.fillRect(x, y + 31, T, 1);
+        ctx.fillRect(x + (r % 2 ? 8 : 24), y, 1, 15); ctx.fillRect(x + (r % 2 ? 24 : 8), y + 16, 1, 15);
+        if (!solidAt(c - 1, r)) { ctx.fillStyle = THEME.stoneLight; ctx.fillRect(x, y, 3, T); }
+        if (!solidAt(c + 1, r)) { ctx.fillStyle = THEME.stoneShade; ctx.fillRect(x + T - 4, y, 4, T); }
+        if (!solidAt(c, r - 1)) {
+          // Toit en zinc à joints debout + corniche
+          ctx.fillStyle = THEME.zinc; ctx.fillRect(x - 1, y, T + 2, 8);
+          ctx.fillStyle = THEME.zincSeam;
+          for (let i = 4; i < T; i += 8) ctx.fillRect(x + i, y, 1, 8);
+          ctx.fillStyle = THEME.cornice; ctx.fillRect(x - 3, y + 8, T + 6, 4);
+          ctx.fillStyle = THEME.corniceShadow; ctx.fillRect(x - 3, y + 12, T + 6, 2);
         } else if (c % 2 === 0 && r % 2 === 1 && solidAt(c, r - 2)) {
-          ctx.fillStyle = hash(c, r) < 0.16 ? THEME.windowLit : THEME.window;
-          ctx.fillRect(x + 9, y + 4, 14, 24);
+          // Haute fenêtre, parfois avec balcon en fer forgé
+          ctx.fillStyle = THEME.stoneLight; ctx.fillRect(x + 7, y + 1, 18, 30);
+          ctx.fillStyle = THEME.glass; ctx.fillRect(x + 9, y + 3, 14, 27);
+          ctx.fillStyle = THEME.glassHi; ctx.fillRect(x + 10, y + 4, 3, 25);
+          ctx.fillStyle = THEME.stoneLight; ctx.fillRect(x + 15.5, y + 3, 1, 27);
+          if (hash(c, r) < 0.45) {
+            ctx.fillStyle = THEME.iron;
+            ctx.fillRect(x + 5, y + 21, 22, 2); ctx.fillRect(x + 5, y + 29, 22, 1.5);
+            for (let i = 0; i < 6; i++) ctx.fillRect(x + 6 + i * 4, y + 23, 1, 6);
+            ctx.fillStyle = THEME.cornice; ctx.fillRect(x + 4, y + 30.5, 24, 1.5);
+          }
         }
         if (ch !== '#') {
           ctx.fillStyle = ch === 's' ? THEME.slick : THEME.sticky;
@@ -894,15 +1027,15 @@ function drawTiles() {
 }
 
 function drawSigns() {
-  ctx.font = '600 14px system-ui, sans-serif';
-  ctx.fillStyle = THEME.text;
-  ctx.globalAlpha = 0.7;
+  ctx.font = '700 14px system-ui, sans-serif';
+  ctx.lineWidth = 4; ctx.lineJoin = 'round';
+  ctx.strokeStyle = THEME.textHalo; ctx.fillStyle = THEME.text;
   const touch = document.body.classList.contains('coarse');
   for (const s of signs) {
     if (s.x > camX + viewW || s.x + 400 < camX) continue;
-    ctx.fillText(touch ? s.touch : s.keys, s.x, s.y);
+    const t = touch ? s.touch : s.keys;
+    ctx.strokeText(t, s.x, s.y); ctx.fillText(t, s.x, s.y);
   }
-  ctx.globalAlpha = 1;
 }
 
 function drawCheckpoints() {
@@ -953,15 +1086,24 @@ function drawRunner(x, y, o) {
   ctx.rotate(lean);
   ctx.lineCap = 'round';
 
-  limb(0, -12, legB, 12, C.pantsDark, 4.5);
+  // Jambe : pantalon large, et grosses bottes si le perso en porte
+  const leg = (ang, color) => {
+    limb(0, -12, ang, 12, color, C.boots ? 5.5 : 4.5);
+    if (C.boots) {
+      const fx = Math.sin(ang) * 12, fy = -12 + Math.cos(ang) * 12;
+      ctx.fillStyle = C.boots; rr(fx - 4.5, fy - 6, 10, 7, 3);
+    }
+  };
+  leg(legB, C.pantsDark);
   limb(0, -21, armB, 10, C.bodyDark, 3.5);
   if (o.pack) { ctx.fillStyle = C.accent; rr(-11, -24, 6, 11, 2); }
   ctx.fillStyle = C.body; rr(-6, -25, 12, 15, 4);
-  limb(0, -12, legA, 12, C.pants, 4.5);
+  leg(legA, C.pants);
 
   if (o.hood) {
     ctx.fillStyle = C.body; ctx.beginPath(); ctx.arc(-0.5, -29.5, 6.8, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = C.skin; ctx.beginPath(); ctx.arc(2, -28.6, 4.6, 0, Math.PI * 2); ctx.fill();
+    if (C.glasses) { ctx.fillStyle = C.glasses; rr(0, -34.5, 8, 2.6, 1.2); }
   } else {
     ctx.fillStyle = C.skin; ctx.beginPath(); ctx.arc(1, -29, 5.5, 0, Math.PI * 2); ctx.fill();
   }
@@ -1025,7 +1167,8 @@ function render() {
   const sky = ctx.createLinearGradient(0, 0, 0, viewH);
   sky.addColorStop(0, THEME.skyTop); sky.addColorStop(1, THEME.skyBottom);
   ctx.fillStyle = sky; ctx.fillRect(0, 0, viewW, viewH);
-  drawLayers(beat);
+  drawClouds();
+  drawLayers();
   if (state === 'play') { ctx.fillStyle = THEME.beatFlash; ctx.globalAlpha = beat; ctx.fillRect(0, 0, viewW, viewH); ctx.globalAlpha = 1; }
 
   ctx.save();
