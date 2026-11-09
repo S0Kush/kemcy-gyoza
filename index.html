@@ -329,7 +329,7 @@ const ASSETS = {
   shop: 'assets/shop/shop_front.webp',
   room_coral: 'assets/store/room_coral.webp', room_snacks: 'assets/store/room_snacks.webp',
   room_plush: 'assets/store/room_plush.webp', room_lilac: 'assets/store/room_lilac.webp',
-  kemcy: 'assets/sprites/kemcy.webp', kemcyHat: 'assets/sprites/kemcy_hat.png', girl: 'assets/sprites/girl.png',
+  kemcy: 'assets/sprites/kemcy.webp', kemcyHat: 'assets/sprites/kemcy_hat.webp', girl: 'assets/sprites/girl.png',
   gyoza: 'assets/items/gyoza.png', juice: 'assets/items/juice.png', hat: 'assets/items/hat.png', plus3: 'assets/items/plus3.png',
   booth: 'assets/items/booth.png', boothSecret: 'assets/items/booth_secret.png',
   spray: 'assets/items/spray.png', splash: 'assets/items/splash.png',
@@ -410,7 +410,7 @@ const TILES = [
 const SHEETS = {
   // Kemcy : planche de 24 colonnes (marche ComfyUI, 24 images par cycle de deux pas)
   // ligne 2 : saut découpé dans la vidéo ComfyUI (16 images), choisies selon la vitesse verticale
-  kemcy: { cols: 24, size: 2.6, foot: 0.025, air: [2, 16], idle: [0, 1, 1], run: [1, 24, 0], wall: [3, 1, 1], stun: [4, 1, 1] },
+  kemcy: { cols: 24, size: 2.6, foot: 0.025, air: [2, 16], idle: [0, 10, 5], run: [1, 24, 0], wall: [3, 1, 1], stun: [4, 1, 1], walk: [5, 24, 0], power: [6, 22, 16] },
   girl:  { idle: [0, 2, 3], run: [1, 6, 0], jump: [2, 1, 1], fall: [3, 1, 1], spray: [4, 2, 8], stun: [5, 2, 6] },
 };
 
@@ -638,7 +638,7 @@ function reset() {
     x: checkpoints[0].x - P.w / 2, y: checkpoints[0].y - P.h, vx: 0, vy: 0,
     onGround: false, facing: 1, coyote: 0, buf: 0, wallCoyote: 0, wallDir: 0, wallLock: 0,
     cut: true, stun: 0, drop: 0, phase: 0, squash: 0, surf: null, splat: 0, inv: 0, sliding: false,
-    hat: false, plus3: false, airJumps: 0, boost: 0,
+    hat: false, plus3: false, airJumps: 0, boost: 0, power: 0,
   });
   Object.assign(G, {
     i: 0, t: 0, moving: false, x: WP[0].x, y: WP[0].y, facing: -1, state: 'tag',
@@ -720,10 +720,11 @@ function updatePlayer(dt) {
   P.splat = Math.max(0, P.splat - dt);
   P.inv = Math.max(0, P.inv - dt);
   P.boost = Math.max(0, P.boost - dt);
+  P.power = Math.max(0, P.power - dt);
   P.squash *= Math.pow(0.0008, dt);
 
   let dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
-  if (P.stun > 0) dir = 0;
+  if (P.stun > 0 || P.power > 0) dir = 0;
   const surf = P.onGround ? P.surf : null;
   const maxSpd = PHYS.runMax * (surf === 'k' ? PHYS.stickySpeed : 1) * (P.boost > 0 ? PHYS.boostMul : 1);
   if (P.boost > 0 && Math.random() < 0.5) dust(P.x + P.w / 2, P.y + P.h / 2, 1, 0.3, THEME.juice);
@@ -765,7 +766,7 @@ function updatePlayer(dt) {
   } else P.wallCoyote = 0;
 
   // Sauts
-  if (P.buf > 0 && P.stun <= 0) {
+  if (P.buf > 0 && P.stun <= 0 && P.power <= 0) {
     if (P.coyote > 0) {
       P.vy = -PHYS.jumpV * (surf === 'k' ? PHYS.stickyJump : 1);
       P.coyote = 0; P.buf = 0; P.cut = false; P.squash = -0.6;
@@ -829,7 +830,7 @@ function updatePlayer(dt) {
     if (it.type === 'juice') { P.boost = 3; pop(it.x, it.y - 12, 'ゴクゴク!', THEME.juice, 16); Sound.coin(); }
     if (it.type === 'hat') { P.hat = true; pop(it.x, it.y - 16, 'かわいい!', THEME.neonPink, 16); Sound.check(); }
     if (it.type === 'plus3') {
-      P.plus3 = true; P.airJumps = 2;
+      P.plus3 = true; P.airJumps = 2; P.power = POWER_T; P.vx = 0;
       pop(it.x, it.y - 14, '+3!!', THEME.neonGreen, 24); Sound.win();
       burst(it.x, it.y, THEME.neonPink, 18, 220);
     }
@@ -1345,7 +1346,8 @@ function drawSprite(im, sheet, anim, phase, x, y, facing, squash = 0, vy = 0) {
     // vitesse verticale -> image : impulsion, montée, sommet, descente, réception
     [row, n] = sheet.air;
     f = Math.max(2, Math.min(n - 3, Math.round(2 + (vy + PHYS.jumpV) / (PHYS.jumpV + PHYS.fallMax) * (n - 5))));
-  } else f = fps ? Math.floor(gt * fps) % n : Math.floor((phase / (Math.PI * 2)) * n) % n;
+  } else if (anim === 'power') f = Math.min(n - 1, Math.floor((POWER_T - P.power) * fps));   // joué une fois depuis le ramassage
+  else f = fps ? Math.floor(gt * fps) % n : Math.floor((phase / (Math.PI * 2)) * n) % n;
   ctx.save(); ctx.translate(x, y);
   ctx.scale(facing * (1 + squash * 0.18), 1 - squash * 0.18);
   const c = im.width / (sheet.cols || 6), d = sheet.size ? sheet.size * T : SIZE.frame, foot = (sheet.foot || 0) * d;
@@ -2393,10 +2395,13 @@ function graffeurAnim() {
   return 'idle';
 }
 
+const POWER_T = 1.35;   // durée de l'aura quand Kemcy ramasse le « +3 »
 function playerAnim() {
+  if (P.power > 0) return 'power';
   if (P.stun > 0) return 'stun';
   if (!P.onGround) return P.sliding ? 'wall' : (P.vy < 0 ? 'jump' : 'fall');
-  return Math.abs(P.vx) > 20 ? 'run' : 'idle';
+  if (Math.abs(P.vx) <= 20) return 'idle';
+  return P.surf === 'k' ? 'walk' : 'run';   // marche lente dans la peinture collante
 }
 
 function drawOffscreenArrow() {
@@ -2476,7 +2481,8 @@ function render() {
   if (!(P.inv > 0 && Math.floor(gt * 20) % 2 === 0 && state === 'play')) {
     const sheet = P.hat && IMG.kemcyHat ? IMG.kemcyHat : IMG.kemcy;
     if (sheet) {
-      drawSprite(sheet, SHEETS.kemcy, playerAnim(), P.phase, P.x + P.w / 2, P.y + P.h, P.facing, P.squash, P.vy);
+      const anim = playerAnim(), hug = anim === 'wall' ? P.facing * 6 : 0;   // collé à la paroi pendant la glissade
+      drawSprite(sheet, SHEETS.kemcy, anim, P.phase, P.x + P.w / 2 + hug, P.y + P.h, P.facing, P.squash, P.vy);
       if (P.hat && !IMG.kemcyHat) drawEarHat(P.x + P.w / 2 + P.facing * 2, P.y + P.h - SHEETS.kemcy.size * T * 0.83, 1.7);
     }
     else drawRunner(P.x + P.w / 2, P.y + P.h, {
