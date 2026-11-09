@@ -58,7 +58,16 @@
     position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
     background: rgba(12, 13, 17, .62); padding: 16px; overflow-y: auto;
   }
-  .screen.show { display: flex; }
+  .screen.show { display: flex; touch-action: pan-y; }
+  button { touch-action: manipulation; }
+  .rotate-hint {
+    position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column; gap: 14px;
+    align-items: center; justify-content: center; text-align: center; padding: 24px;
+    background: #14121a; color: var(--ink); font: 900 20px "Mochiy Pop One", system-ui, sans-serif;
+  }
+  .rotate-hint .phone { width: 46px; height: 78px; border: 4px solid var(--neon-pink); border-radius: 10px; animation: turn 1.6s ease-in-out infinite; }
+  @keyframes turn { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) and (pointer: coarse) { .rotate-hint { display: flex; } }
   .card {
     position: relative; margin: auto;
     background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
@@ -155,6 +164,7 @@
 </head>
 <body>
 <canvas id="game"></canvas>
+<div class="rotate-hint"><div class="phone"></div>Tourne ton téléphone<br>pour jouer</div>
 
 <div class="hud">
   <div class="stats">
@@ -2636,6 +2646,18 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) pause
 addEventListener('blur', () => { if (state === 'play') pause(); });
 addEventListener('resize', () => { resize(); clampCamera(); });
 addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Mobile : Safari iOS ignore « user-scalable=no ». On bloque nous-mêmes le pincement et le double appui,
+// sinon le jeu reste zoomé sans moyen de revenir.
+['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, (e) => e.preventDefault(), { passive: false }));
+document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - lastTouchEnd < 350 && !e.target.closest('.pad')) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
 
 const coarse = matchMedia('(pointer: coarse)');
 const syncPointer = () => document.body.classList.toggle('coarse', coarse.matches);
