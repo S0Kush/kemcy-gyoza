@@ -242,8 +242,8 @@
 // CONFIG : réglages du jeu
 // ============================================================
 const CONFIG = {
-  music: 'gyoza.mp3',   // fichier audio placé à côté de ce .html (ignoré s'il est absent)
-  bpm: 96,              // tempo de Gyoza, pour les pulsations visuelles
+  music: 'assets/audio/gyoza.mp3',   // « kemcy+3 airamitsuki 3 »
+  bpm: 97.5,            // tempo estimé (pulsations visuelles) ; à corriger si besoin
   musicVolume: 0.8,
   grain: 0.12,          // intensité du grain photo (0 = aucun)
 };
@@ -329,7 +329,7 @@ const ASSETS = {
   shop: 'assets/shop/shop_front.webp',
   room_coral: 'assets/store/room_coral.webp', room_snacks: 'assets/store/room_snacks.webp',
   room_plush: 'assets/store/room_plush.webp', room_lilac: 'assets/store/room_lilac.webp',
-  kemcy: 'assets/sprites/kemcy.png', kemcyHat: 'assets/sprites/kemcy_hat.png', girl: 'assets/sprites/girl.png',
+  kemcy: 'assets/sprites/kemcy.webp', kemcyHat: 'assets/sprites/kemcy_hat.png', girl: 'assets/sprites/girl.png',
   gyoza: 'assets/items/gyoza.png', juice: 'assets/items/juice.png', hat: 'assets/items/hat.png', plus3: 'assets/items/plus3.png',
   booth: 'assets/items/booth.png', boothSecret: 'assets/items/booth_secret.png',
   spray: 'assets/items/spray.png', splash: 'assets/items/splash.png',
@@ -408,7 +408,9 @@ const TILES = [
 ];
 // Planches d'animation (cases de 32×32 px) : ligne, nombre d'images, images/seconde (0 = au rythme de la course)
 const SHEETS = {
-  kemcy: { idle: [0, 2, 3], run: [1, 6, 0], jump: [2, 1, 1], fall: [3, 1, 1], wall: [4, 1, 1], stun: [5, 2, 8] },
+  // Kemcy : planche de 24 colonnes (marche ComfyUI, 24 images par cycle de deux pas)
+  // ligne 2 : saut découpé dans la vidéo ComfyUI (16 images), choisies selon la vitesse verticale
+  kemcy: { cols: 24, size: 2.6, foot: 0.025, air: [2, 16], idle: [0, 1, 1], run: [1, 24, 0], wall: [3, 1, 1], stun: [4, 1, 1] },
   girl:  { idle: [0, 2, 3], run: [1, 6, 0], jump: [2, 1, 1], fall: [3, 1, 1], spray: [4, 2, 8], stun: [5, 2, 6] },
 };
 
@@ -627,7 +629,7 @@ const photos = [];        // photos prises aux points de reprise, pour la bande 
 let skylightBroken = false, slowmo = 0, secretFound = false, snapQueued = false;
 const input = { left: false, right: false, down: false, jump: false, jumpQueued: false };
 
-const P = { w: 22, h: 30 };
+const P = { w: 26, h: 52 };
 const G = {};
 let respawn = { x: 0, y: 0 };
 
@@ -1336,14 +1338,18 @@ function drawParallaxImage(im, f, scale, fill) {
 }
 
 // Planche d'animation : 6 × 6 cases carrées (taille libre), pieds au milieu du bas de la case
-function drawSprite(im, sheet, anim, phase, x, y, facing, squash = 0) {
-  const def = sheet[anim] || sheet.idle;
-  const [row, n, fps] = def;
-  const f = fps ? Math.floor(gt * fps) % n : Math.floor((phase / (Math.PI * 2)) * n) % n;
+function drawSprite(im, sheet, anim, phase, x, y, facing, squash = 0, vy = 0) {
+  let def = sheet[anim] || sheet.idle;
+  let [row, n, fps] = def, f;
+  if (sheet.air && (anim === 'jump' || anim === 'fall')) {
+    // vitesse verticale -> image : impulsion, montée, sommet, descente, réception
+    [row, n] = sheet.air;
+    f = Math.max(2, Math.min(n - 3, Math.round(2 + (vy + PHYS.jumpV) / (PHYS.jumpV + PHYS.fallMax) * (n - 5))));
+  } else f = fps ? Math.floor(gt * fps) % n : Math.floor((phase / (Math.PI * 2)) * n) % n;
   ctx.save(); ctx.translate(x, y);
   ctx.scale(facing * (1 + squash * 0.18), 1 - squash * 0.18);
-  const c = im.width / 6, d = SIZE.frame;
-  ctx.drawImage(im, f * c, row * c, c, c, -d / 2, -d, d, d);
+  const c = im.width / (sheet.cols || 6), d = sheet.size ? sheet.size * T : SIZE.frame, foot = (sheet.foot || 0) * d;
+  ctx.drawImage(im, f * c, row * c, c, c, -d / 2, -d + foot, d, d);
   ctx.restore();
 }
 
@@ -1644,10 +1650,13 @@ function drawParking() {
   g.addColorStop(0, '#2c2b33'); g.addColorStop(1, '#1b1a20');
   ctx.fillStyle = g; ctx.fillRect(x0, 0, x1 - x0, 19 * T);
   if (IMG.park_wall) {
-    const h = 11 * T, w = h * IMG.park_wall.width / IMG.park_wall.height;
-    for (let x = x0; x < x1; x += w) ctx.drawImage(IMG.park_wall, x, 19 * T - h + 8, Math.min(w, x1 - x), h, );
-    // piliers, enceinte, signalétique, cône, pneus
-    for (let px = x0 + 4 * T, k = 0; px < x1; px += 12 * T, k++) put(k % 2 ? 'pk_pillar_2' : 'pk_pillar_1', px, 19 * T + 4, 10.5 * T);
+    // Mur : panneaux répétés, chaque raccord caché derrière un pilier
+    const h = 10.3 * T, w = h * IMG.park_wall.width / IMG.park_wall.height, pw = 1.6 * T;
+    const seams = [];
+    for (let x = x0 + 2 * T; x < x1; x += w) { ctx.drawImage(IMG.park_wall, x, 19 * T - h + 6, Math.min(w, x1 - x), h); seams.push(x); }
+    seams.forEach((sx, k) => put(k % 2 ? 'pk_pillar_2' : 'pk_pillar_1', sx - pw / 2, 19 * T + 4, 10.5 * T));
+    // Fond du niveau : un gros pilier de béton plein cadre
+    if (IMG.pk_pillar_1) ctx.drawImage(IMG.pk_pillar_1, x1 - 0.4 * T, 8.6 * T, 2.6 * T, 10.6 * T);
     put('pk_exit', x0 + 8 * T, 11.6 * T, 1.3 * T);
     put('pk_speaker', x0 + 46 * T, 19 * T + 4, 3.4 * T);
     put('pk_speaker', x0 + 52 * T, 19 * T + 4, 3.4 * T);
@@ -1690,7 +1699,7 @@ function drawParkingTile(ch, c, r, x, y) {
     if (!solidAt(c, r + 1)) drawStrip(IMG.park_ceiling, x, y + T - 1.6 * T + 6, 1.6 * T);
     return;
   }
-  if (ch === 'q' && IMG.pk_bar && r === 15) {
+  if (ch === 'q' && IMG.pk_bar && r === 15 && c < 331) {
     if (tileAt(c - 1, r) !== 'q') {
       let n = 0; while (tileAt(c + n, r) === 'q') n++;
       for (const sx of [x + 6, x + n * T - 22]) ctx.drawImage(IMG.pk_pillar_2, sx, y + 10, 16, 4 * T - 10);
@@ -1707,6 +1716,8 @@ function drawParkingTile(ch, c, r, x, y) {
     }
     return;
   }
+  if (c >= 331 && r > 8 && r < 19 && IMG.pk_pillar_1) return;
+  if (c >= 331 && r >= 19) { ctx.fillStyle = '#16151a'; ctx.fillRect(x, y, T, T); return; }
   ctx.fillStyle = '#3a3940'; ctx.fillRect(x, y, T, T);
   ctx.fillStyle = 'rgba(0,0,0,0.25)'; if (c % 4 === 0) ctx.fillRect(x, y, 2, T);
   if (!solidAt(c, r + 1)) {
@@ -2464,7 +2475,10 @@ function render() {
 
   if (!(P.inv > 0 && Math.floor(gt * 20) % 2 === 0 && state === 'play')) {
     const sheet = P.hat && IMG.kemcyHat ? IMG.kemcyHat : IMG.kemcy;
-    if (sheet) drawSprite(sheet, SHEETS.kemcy, playerAnim(), P.phase, P.x + P.w / 2, P.y + P.h, P.facing, P.squash);
+    if (sheet) {
+      drawSprite(sheet, SHEETS.kemcy, playerAnim(), P.phase, P.x + P.w / 2, P.y + P.h, P.facing, P.squash, P.vy);
+      if (P.hat && !IMG.kemcyHat) drawEarHat(P.x + P.w / 2 + P.facing * 2, P.y + P.h - SHEETS.kemcy.size * T * 0.83, 1.7);
+    }
     else drawRunner(P.x + P.w / 2, P.y + P.h, {
       colors: THEME.kemcy, facing: P.facing, phase: P.phase, anim: playerAnim(), squash: P.squash, style: 'kemcy', hat: P.hat, splat: P.splat > 0,
     });
