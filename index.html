@@ -329,7 +329,7 @@ const ASSETS = {
   shop: 'assets/shop/shop_front.webp',
   room_coral: 'assets/store/room_coral.webp', room_snacks: 'assets/store/room_snacks.webp',
   room_plush: 'assets/store/room_plush.webp', room_lilac: 'assets/store/room_lilac.webp',
-  kemcy: 'assets/sprites/kemcy.webp', kemcyHat: 'assets/sprites/kemcy_hat.webp', girl: 'assets/sprites/girl.png',
+  kemcy: 'assets/sprites/kemcy.webp', kemcyHat: 'assets/sprites/kemcy_hat.webp', girl: 'assets/sprites/girl.webp',
   gyoza: 'assets/items/gyoza.png', juice: 'assets/items/juice.png', hat: 'assets/items/hat.png', plus3: 'assets/items/plus3.png',
   booth: 'assets/items/booth.png', boothSecret: 'assets/items/booth_secret.png',
   spray: 'assets/items/spray.png', splash: 'assets/items/splash.png',
@@ -411,7 +411,8 @@ const SHEETS = {
   // Kemcy : planche de 24 colonnes (marche ComfyUI, 24 images par cycle de deux pas)
   // ligne 2 : saut découpé dans la vidéo ComfyUI (16 images), choisies selon la vitesse verticale
   kemcy: { cols: 24, size: 2.6, foot: 0.025, air: [2, 16], idle: [0, 10, 5], run: [1, 24, 0], wall: [3, 1, 1], stun: [4, 1, 1], walk: [5, 24, 0], power: [6, 22, 16] },
-  girl:  { idle: [0, 2, 3], run: [1, 6, 0], jump: [2, 1, 1], fall: [3, 1, 1], spray: [4, 2, 8], stun: [5, 2, 6] },
+  // Kiki : course et attente découpées dans les vidéos ComfyUI, même échelle que Kemcy
+  girl:  { cols: 24, size: 2.6, foot: 0.025, air: [2, 19], idle: [0, 18, 8], run: [1, 24, 0], spray: [4, 1, 1], stun: [5, 1, 1] },
 };
 
 // ============================================================
@@ -954,7 +955,7 @@ function updateGraffeur(dt) {
   }
 
   // Attrapé ?
-  if (P.stun <= 0 && rects(P.x, P.y, P.w, P.h, G.x - 11, G.y - 30, 22, 30)) catchGraffeur();
+  if (P.stun <= 0 && rects(P.x, P.y, P.w, P.h, G.x - 13, G.y - 50, 26, 50)) catchGraffeur();
 }
 
 const BOMB_G = 1400;
@@ -1339,13 +1340,14 @@ function drawParallaxImage(im, f, scale, fill) {
 }
 
 // Planche d'animation : 6 × 6 cases carrées (taille libre), pieds au milieu du bas de la case
-function drawSprite(im, sheet, anim, phase, x, y, facing, squash = 0, vy = 0) {
+function drawSprite(im, sheet, anim, phase, x, y, facing, squash = 0, vy = 0, airT = null) {
   let def = sheet[anim] || sheet.idle;
   let [row, n, fps] = def, f;
   if (sheet.air && (anim === 'jump' || anim === 'fall')) {
     // vitesse verticale -> image : impulsion, montée, sommet, descente, réception
     [row, n] = sheet.air;
-    f = Math.max(2, Math.min(n - 3, Math.round(2 + (vy + PHYS.jumpV) / (PHYS.jumpV + PHYS.fallMax) * (n - 5))));
+    if (airT !== null) f = Math.min(n - 1, Math.floor(airT * n));   // saut scripté : progression de 0 à 1
+    else f = Math.max(2, Math.min(n - 3, Math.round(2 + (vy + PHYS.jumpV) / (PHYS.jumpV + PHYS.fallMax) * (n - 5))));
   } else if (anim === 'power') f = Math.min(n - 1, Math.floor((POWER_T - P.power) * fps));   // joué une fois depuis le ramassage
   else f = fps ? Math.floor(gt * fps) % n : Math.floor((phase / (Math.PI * 2)) * n) % n;
   ctx.save(); ctx.translate(x, y);
@@ -2473,7 +2475,7 @@ function render() {
 
   const girlHidden = storeCover > 0.5 && G.x > STORE.x0 * T && G.x < (STORE.x1 + 1) * T && G.y > 7 * T;
   if (girlHidden) { /* elle est dans le magasin, derrière la façade */ }
-  else if (IMG.girl) drawSprite(IMG.girl, SHEETS.girl, graffeurAnim(), G.phase, G.x, G.y, G.facing);
+  else if (IMG.girl) drawSprite(IMG.girl, SHEETS.girl, graffeurAnim(), G.phase, G.x, G.y, G.facing, 0, 0, G.moving && G.ctrl ? G.t : null);
   else drawRunner(G.x, G.y, {
     colors: THEME.graffeur, facing: G.facing, phase: G.phase, anim: graffeurAnim(), style: 'girl', can: G.state !== 'caught',
   });
